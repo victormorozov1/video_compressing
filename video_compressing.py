@@ -77,24 +77,35 @@ if __name__ == '__main__':
     signal = np.frombuffer(signal, "int")
     fs = spf.getframerate()
 
-    clock = pygame.time.Clock()
+    res = wave.open("audio2.wav", "w")
+    res.setnchannels(1)
+    res.setframerate(fs)
+    
+
+
 
     ind = 0
 
-    while cap.isOpened():
-        ret, frame = cap.read()
+    # while cap.isOpened():
+    #     ret, frame = cap.read()
+    #
+    #     cv2.imshow('frame', frame)
+    #
+    #     if cv2.waitKey(1) & 0xFF == ord('q'):
+    #         break
+    #     stream.write(all_song[ind])
+    #     ind += 1
+    #
+    #     clock.tick(fps)
+    #
+    #     print('=' * (signal[ind * fs // fps] // 10 ** 7))
 
-        cv2.imshow('frame', frame)
+    LEVEL = 10 ** 7 * 15
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        stream.write(all_song[ind])
-        ind += 1
+    while ind < len(signal):
+        # while ind < len(signal) and signal[ind * fs // fps] < LEVEL:
+        #     ind += 1
+        # else:
+        res.writeframesraw(signal[ind])
 
-        clock.tick(fps)
-
-        print('=' * (signal[ind * fs // fps] // 10 ** 7))
-
-
-    cap.release()
-    cv2.destroyAllWindows()
+    res.close()
