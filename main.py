@@ -35,7 +35,7 @@ def video_processing(start_time, end_time, ind):
 
 if __name__ == '__main__':
     result_clips = []
-    video = VideoFileClip('2n.mp4').subclip(0, 200)
+    video = VideoFileClip('2n.mp4').subclip(0, 100)
 
     one_process_video_time = video.duration // PROCESS_NUM
 
@@ -51,13 +51,9 @@ if __name__ == '__main__':
     for p in processes:
         p.join()
 
-    # print(result_clips)
-    #
-    # d = len(result_clips) // 11
-    # for i in range(10):
-    #     res = concatenate_videoclips(result_clips[d * i:d * (i + 1):])
-    #     res.write_videofile(f'res{i}.mp4')
-    # res = concatenate_videoclips(result_clips)
-    # res.write_videofile('res.mp4')
-    # result = concatenate_videoclips(result_clips[:-1:])
-    # result.write_videofile('res.mp4')
+    print('All videos are processed.')
+
+    processed_videos = []
+    for i in range(1, PROCESS_NUM + 1):
+        processed_videos.append(VideoFileClip(f'res{i}.mp4'))
+    concatenate_videoclips(processed_videos).write_videofile('res.mp4')
