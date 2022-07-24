@@ -1,14 +1,18 @@
 import multiprocessing
-
 from moviepy.editor import *
 from multiprocessing import Process
+from time import time
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 TIME_X = 100
 TIME_QUANTIUM = 1 / TIME_X
-MIN_VOLUME_LVL = 0.0003
-PROCESS_NUM = 3
+MIN_VOLUME_LVL = 0.003
+PROCESS_NUM = 4
+VIDEO_NAME = '3n.mp4'
+SPACE_TIME = 1
 
-video = VideoFileClip('2n.mp4').subclip(0, 20)
+video = VideoFileClip(VIDEO_NAME)
+print(video.duration)
 
 
 def important(time, diff):
@@ -24,24 +28,46 @@ def important(time, diff):
 
 
 def video_processing(start_time, end_time, ind, return_dict):
+    files = []
     print(start_time, end_time)
 
     result_clips_times = []
 
     for time in range(start_time * TIME_X, end_time * TIME_X):
-        print(f'PROCESS-{ind}: {int((time / TIME_X - start_time) / (end_time - start_time) * 100)}%')
+        # print(f'PROCESS-{ind}/: {int((time / TIME_X - start_time) / (end_time - start_time) * 100)}%')
         if important(time / TIME_X, 3):
-            result_clips_times.append((time / TIME_X, time / TIME_X + TIME_QUANTIUM))
+            result_clips_times.append([time / TIME_X, time / TIME_X + TIME_QUANTIUM])
 
-    return_dict[ind] = result_clips_times
+    if not result_clips_times:
+        return
+
+    result_clips_times2 = [result_clips_times[0]]
+
+    for time_interval in result_clips_times[1::]:
+
+        if time_interval[0] - result_clips_times2[-1][1] < SPACE_TIME:
+            result_clips_times2[-1][1] = time_interval[1]
+        else:
+            result_clips_times2.append(time_interval)
+
+    for i in range(len(result_clips_times2)):
+        # filename = f"videos/res{ind}-{i}-Time {str(result_clips_times2[i][0]).replace('.', ',')}-{str(result_clips_times2[i][1]).replace('.', ',')}.mp4"
+        filename = f"videos/res{ind}-{i}.mp4"
+        ffmpeg_extract_subclip(VIDEO_NAME, *result_clips_times2[i], targetname=filename)
+        files.append(filename)
+    return_dict[ind] = files
 
 
 if __name__ == '__main__':
+    start_time = time()
+
     manager = multiprocessing.Manager()
     return_dict = manager.dict()
 
-    one_process_video_time = video.duration // PROCESS_NUM
-
+    print('duration:', video.duration)
+    one_process_video_time = int(video.duration) // PROCESS_NUM
+    print(int(video.duration))
+    print(one_process_video_time)
     processes = []
 
     for i in range(1, PROCESS_NUM):
@@ -54,9 +80,11 @@ if __name__ == '__main__':
     processes.append(
         Process(
             target=video_processing,
-            args=((PROCESS_NUM - 1) * one_process_video_time, video.duration, PROCESS_NUM, return_dict)
+            args=((PROCESS_NUM - 1) * one_process_video_time, int(video.duration), PROCESS_NUM, return_dict)
         )
     )
+
+    print(processes)
 
     for p in processes:
         p.start()
@@ -66,7 +94,17 @@ if __name__ == '__main__':
 
     print('All videos are processed.')
 
-    processed_videos = []
-    for i in range(1, PROCESS_NUM + 1):
-        processed_videos.extend([video.subclip(*j) for j in return_dict[i]])
-    concatenate_videoclips(processed_videos).write_videofile('res.mp4')
+    all_video_names = open("list.txt", "w")
+    for i in sorted(return_dict.keys()):
+        for filename in return_dict[i]:
+            all_video_names.write(f"file '{filename}'\n")
+
+    all_video_names.close()
+
+    print(time() - start_time)
+
+    # processed_videos = []
+    # for i in range(1, PROCESS_NUM + 1):
+    #     processed_videos.extend([video.subclip(*j) for j in return_dict[i]])
+    # concatenate_videoclips(processed_videos).write_videofile('res.mp4')
+
