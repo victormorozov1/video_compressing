@@ -7,9 +7,9 @@ from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 TIME_X = 100
 TIME_QUANTIUM = 1 / TIME_X
-MIN_VOLUME_LVL = float(sys.argv[2]) if len(sys.argv) >= 3 else 0.003
+MIN_VOLUME_LVL = float(sys.argv[2]) if len(sys.argv) >= 3 else 0.01
 PROCESS_NUM = 4
-VIDEO_NAME = sys.argv[1]
+VIDEO_NAME = sys.argv[1] if len(sys.argv) >= 2 else 'input.mp4'
 SPACE_TIME = 1
 
 video = VideoFileClip(VIDEO_NAME)
@@ -28,7 +28,6 @@ def important(time, diff):
 
 
 def video_processing(start_time, end_time, ind, return_dict):
-    files = []
     print(start_time, end_time)
 
     result_clips_times = []
@@ -37,23 +36,12 @@ def video_processing(start_time, end_time, ind, return_dict):
         if important(time / TIME_X, 3):
             result_clips_times.append([time / TIME_X, time / TIME_X + TIME_QUANTIUM])
 
-    if not result_clips_times:
-        return
-
-    result_clips_times2 = [result_clips_times[0]]
-
-    for time_interval in result_clips_times[1::]:
-
-        if time_interval[0] - result_clips_times2[-1][1] < SPACE_TIME:
-            result_clips_times2[-1][1] = time_interval[1]
-        else:
-            result_clips_times2.append(time_interval)
-
-    for i in range(len(result_clips_times2)):
-        filename = f"videos/res{ind}-{i}.mp4"
-        ffmpeg_extract_subclip(VIDEO_NAME, *result_clips_times2[i], targetname=filename)
-        files.append(filename)
-    return_dict[ind] = files
+    # for i in range(len(result_clips_times2)):
+    #     filename = f"videos/res{ind}-{i}.mp4"
+    #     ffmpeg_extract_subclip(VIDEO_NAME, *result_clips_times2[i], targetname=filename)
+    #     print(result_clips_times2[i])
+    #     files.append(filename)
+    return_dict[ind] = result_clips_times
 
 
 def main():
@@ -92,12 +80,28 @@ def main():
     for p in processes:
         p.join()
 
-    print('All videos are processed.')
+    time_intervals = []
+    for a in return_dict.values():
+        time_intervals.extend(a)
+    time_intervals.sort()
+
+    time_intervals2 = [time_intervals[0]]
+    for time_interval in time_intervals[1::]:
+        if time_interval[0] - time_intervals2[-1][1] < SPACE_TIME:
+            time_intervals2[-1][1] = time_interval[1]
+        else:
+            time_intervals2.append(time_interval)
+
+    print(time_intervals2)
+    files = []
+    for i in range(len(time_intervals2)):
+        filename = f"videos/res{i}.mp4"
+        ffmpeg_extract_subclip(VIDEO_NAME, *time_intervals2[i], targetname=filename)
+        files.append(filename)
 
     all_video_names = open("list.txt", "w")
-    for i in sorted(return_dict.keys()):
-        for filename in return_dict[i]:
-            all_video_names.write(f"file '{filename}'\n")
+    for filename in files:
+        all_video_names.write(f"file '{filename}'\n")
 
     all_video_names.close()
 
