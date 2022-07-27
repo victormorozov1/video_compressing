@@ -8,7 +8,7 @@ TIME_X = 100
 TIME_QUANTIUM = 1 / TIME_X
 MIN_VOLUME_LVL = 0.003
 PROCESS_NUM = 4
-VIDEO_NAME = '3n.mp4'
+VIDEO_NAME = '4n.mp4'
 SPACE_TIME = 1
 
 video = VideoFileClip(VIDEO_NAME)
@@ -34,7 +34,6 @@ def video_processing(start_time, end_time, ind, return_dict):
     result_clips_times = []
 
     for time in range(start_time * TIME_X, end_time * TIME_X):
-        # print(f'PROCESS-{ind}/: {int((time / TIME_X - start_time) / (end_time - start_time) * 100)}%')
         if important(time / TIME_X, 3):
             result_clips_times.append([time / TIME_X, time / TIME_X + TIME_QUANTIUM])
 
@@ -51,7 +50,6 @@ def video_processing(start_time, end_time, ind, return_dict):
             result_clips_times2.append(time_interval)
 
     for i in range(len(result_clips_times2)):
-        # filename = f"videos/res{ind}-{i}-Time {str(result_clips_times2[i][0]).replace('.', ',')}-{str(result_clips_times2[i][1]).replace('.', ',')}.mp4"
         filename = f"videos/res{ind}-{i}.mp4"
         ffmpeg_extract_subclip(VIDEO_NAME, *result_clips_times2[i], targetname=filename)
         files.append(filename)
@@ -101,10 +99,6 @@ if __name__ == '__main__':
 
     all_video_names.close()
 
+    os.system('concatenate_videos.bat')
+
     print(time() - start_time)
-
-    # processed_videos = []
-    # for i in range(1, PROCESS_NUM + 1):
-    #     processed_videos.extend([video.subclip(*j) for j in return_dict[i]])
-    # concatenate_videoclips(processed_videos).write_videofile('res.mp4')
-
