@@ -1,4 +1,5 @@
 import multiprocessing
+import sys
 from moviepy.editor import *
 from multiprocessing import Process
 from time import time
@@ -6,13 +7,12 @@ from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 TIME_X = 100
 TIME_QUANTIUM = 1 / TIME_X
-MIN_VOLUME_LVL = 0.003
+MIN_VOLUME_LVL = float(sys.argv[2]) if len(sys.argv) >= 3 else 0.003
 PROCESS_NUM = 4
-VIDEO_NAME = '4n.mp4'
+VIDEO_NAME = sys.argv[1]
 SPACE_TIME = 1
 
 video = VideoFileClip(VIDEO_NAME)
-print(video.duration)
 
 
 def important(time, diff):
@@ -56,16 +56,18 @@ def video_processing(start_time, end_time, ind, return_dict):
     return_dict[ind] = files
 
 
-if __name__ == '__main__':
-    start_time = time()
-
+def main():
     manager = multiprocessing.Manager()
     return_dict = manager.dict()
 
     print('duration:', video.duration)
+    print('video name:', VIDEO_NAME)
+    print('min volume level:', MIN_VOLUME_LVL)
+
     one_process_video_time = int(video.duration) // PROCESS_NUM
-    print(int(video.duration))
+
     print(one_process_video_time)
+
     processes = []
 
     for i in range(1, PROCESS_NUM):
@@ -101,4 +103,15 @@ if __name__ == '__main__':
 
     os.system('concatenate_videos.bat')
 
-    print(time() - start_time)
+
+if __name__ == '__main__':
+    start_time = time()
+
+    try:
+        main()
+    except BaseException as e:
+        print(e)
+
+    print('working time:', time() - start_time)
+
+
