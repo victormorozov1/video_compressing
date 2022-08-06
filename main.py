@@ -9,7 +9,7 @@ TIME_X = 100
 TIME_QUANTIUM = 1 / TIME_X
 MIN_VOLUME_LVL = float(sys.argv[2]) if len(sys.argv) >= 3 else 0.01
 PROCESS_NUM = 4
-VIDEO_NAME = sys.argv[1] if len(sys.argv) >= 2 else 'input.mp4'
+VIDEO_NAME = sys.argv[1] if len(sys.argv) >= 2 else '6.mp4'
 SPACE_TIME = 1
 
 video = VideoFileClip(VIDEO_NAME)
