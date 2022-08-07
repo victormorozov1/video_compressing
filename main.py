@@ -46,8 +46,9 @@ def check_video_folder():
         os.mkdir('videos')
 
 
-def delete_video_folder():
+def delete_unuseful_files():
     shutil.rmtree('videos')
+    os.remove('list.txt')
 
 
 def main():
@@ -115,7 +116,7 @@ def main():
 
     os.system('concatenate_videos.bat')
 
-    delete_video_folder()
+    delete_unuseful_files()
 
 
 if __name__ == '__main__':
