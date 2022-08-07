@@ -5,6 +5,7 @@ from multiprocessing import Process
 from time import time
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 import os
+import shutil
 
 TIME_X = 100
 TIME_QUANTIUM = 1 / TIME_X
@@ -43,6 +44,10 @@ def video_processing(start_time, end_time, ind, return_dict):
 def check_video_folder():
     if not os.path.exists('videos'):
         os.mkdir('videos')
+
+
+def delete_video_folder():
+    shutil.rmtree('videos')
 
 
 def main():
@@ -109,6 +114,8 @@ def main():
     all_video_names.close()
 
     os.system('concatenate_videos.bat')
+
+    delete_video_folder()
 
 
 if __name__ == '__main__':
