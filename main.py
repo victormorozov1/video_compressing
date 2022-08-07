@@ -4,12 +4,13 @@ from moviepy.editor import *
 from multiprocessing import Process
 from time import time
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+import os
 
 TIME_X = 100
 TIME_QUANTIUM = 1 / TIME_X
 MIN_VOLUME_LVL = float(sys.argv[2]) if len(sys.argv) >= 3 else 0.01
 PROCESS_NUM = 4
-VIDEO_NAME = sys.argv[1] if len(sys.argv) >= 2 else '6.mp4'
+VIDEO_NAME = sys.argv[1] if len(sys.argv) >= 2 else 'input.mp4'
 SPACE_TIME = 1
 
 video = VideoFileClip(VIDEO_NAME)
@@ -36,15 +37,17 @@ def video_processing(start_time, end_time, ind, return_dict):
         if important(time / TIME_X, 3):
             result_clips_times.append([time / TIME_X, time / TIME_X + TIME_QUANTIUM])
 
-    # for i in range(len(result_clips_times2)):
-    #     filename = f"videos/res{ind}-{i}.mp4"
-    #     ffmpeg_extract_subclip(VIDEO_NAME, *result_clips_times2[i], targetname=filename)
-    #     print(result_clips_times2[i])
-    #     files.append(filename)
     return_dict[ind] = result_clips_times
 
 
+def check_video_folder():
+    if not os.path.exists('videos'):
+        os.mkdir('videos')
+
+
 def main():
+    check_video_folder()
+
     manager = multiprocessing.Manager()
     return_dict = manager.dict()
 
