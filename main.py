@@ -114,7 +114,7 @@ def main():
 
     all_video_names.close()
 
-    os.system('concatenate_videos.bat')
+    os.system('ffmpeg -f concat -i list.txt -c copy output.mp4')
 
     delete_unuseful_files()
 
